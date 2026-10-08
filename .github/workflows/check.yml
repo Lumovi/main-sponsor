@@ -21,3 +21,9 @@ jobs:
         with:
           node-version: 24
       - run: node check.ts
+      # The rules the app checks what it reads against, and this repository's copy of them, the
+      # same: a change to the app's comes here too, so the two can't drift apart.
+      - name: rules.ts is the app's
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/Lumovi/Lumovi/refs/heads/main/src/backend/sponsor/rules.ts -o "$RUNNER_TEMP/app-rules.ts"
+          diff -u "$RUNNER_TEMP/app-rules.ts" rules.ts

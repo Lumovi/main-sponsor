@@ -4,7 +4,7 @@
  *
  *   node check.ts
  */
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import { checkFile, checkPicture, endOf } from './rules.ts'
 
 const problems: string[] = []
@@ -17,6 +17,12 @@ if (!file.ok) {
     for (const [scheme, name] of Object.entries(sponsor.image)) {
       if (!existsSync(name)) {
         problems.push(`${name} (sponsor.image.${scheme}) isn’t in the repository`)
+        continue
+      }
+      // GitHub serves a link as the path it points to, not the picture: every Lumovi would show
+      // its own card.
+      if (!lstatSync(name).isFile()) {
+        problems.push(`${name} (sponsor.image.${scheme}) must be a file, not a link`)
         continue
       }
       const picture = checkPicture(new Uint8Array(readFileSync(name)))
